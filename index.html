@@ -16,6 +16,10 @@
   --border: #cbd5e1;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-main);
@@ -66,6 +70,7 @@ body {
   font-size: 0.95em;
   cursor: pointer;
   color: #334155;
+  transition: all 0.2s ease;
 }
 .tab-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
 
@@ -177,29 +182,102 @@ body {
   align-items: center;
 }
 
+/* Student Checkpoint Form Styling */
 .form-group {
-  margin-bottom: 22px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
-label { font-weight: bold; margin-bottom: 6px; display: block; }
-input, textarea, select {
+
+.form-group label.field-label {
+  font-weight: 700;
+  font-size: 1.05em;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.field-subtext {
+  font-size: 0.93em;
+  color: #334155;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
+input[type="text"], input[type="date"], textarea, select {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-dark);
+  font-size: 0.95em;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input[type="text"]::placeholder, textarea::placeholder {
+  color: #94a3b8;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+}
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.option-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95em;
+  color: var(--text-dark);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.option-label:hover {
+  background: #f0fdf4;
+  border-color: var(--primary);
+}
+
+.option-label input[type="radio"], .option-label input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
 }
 
 .submit-btn {
   width: 100%;
   background: var(--primary);
   color: white;
-  padding: 14px;
+  padding: 16px;
   font-size: 1.05em;
   font-weight: bold;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.submit-btn:hover {
+  background: var(--primary-dark);
 }
 
 .tab-content { display: none; }
@@ -209,6 +287,17 @@ input, textarea, select {
 .italic { font-style: italic; }
 .subtitle { color: var(--text-muted); }
 
+/* Print Optimizations */
+@media print {
+  body { background-color: #fff; color: #000; padding: 0; }
+  .container { max-width: 100%; }
+  .nav-tabs, .deck-controls, .bellringer-box button, .submit-btn, .header-card { display: none !important; }
+  .tab-content { display: block !important; }
+  #deck-tab, #res-tab { display: none !important; }
+  #form-tab { display: block !important; box-shadow: none; border: none; padding: 0; }
+  .form-group { page-break-inside: avoid; border: 1px solid #ccc; background: #fff; }
+  input, textarea, select { border: 1px solid #999 !important; background: #fff !important; }
+}
 </style>
 </head>
 <body>
@@ -236,7 +325,7 @@ input, textarea, select {
 
   <!-- TABS -->
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('deck')">Deck</button>
+    <button class="tab-btn active" onclick="switchTab('deck')">Slide Deck</button>
     <button class="tab-btn" onclick="switchTab('res')">Resource Hub</button>
     <button class="tab-btn" onclick="switchTab('form')">Student Work Checkpoint</button>
   </div>
@@ -293,16 +382,16 @@ let bellringers = [];
 
 // Stock image pool for default visual slides
 const stockImagePool = [
-  'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80', // Turtle / Nature
-  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=300&q=80', // Water / Earth-Diver
-  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=300&q=80', // Ecology / Forest
-  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80', // Campfire / Orality
-  'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=300&q=80', // Literature / History
-  'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80'  // Writing Workshop
+  'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=300&q=80',
+  'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80'
 ];
 
 // Emoji fallback pool
-const iconPool = ['🐢', '🌊', '🌱', '🗣️', '☯️', '📝'];
+const iconPool = ['🌅', '📜', '✨', '📚', '🤝', '📝'];
 
 function renderSlides(slides) {
   const stage = document.getElementById('slide-stage');
@@ -313,9 +402,7 @@ function renderSlides(slides) {
     wrapper.className = 'slide' + (index === 0 ? ' active' : '');
     wrapper.id = `slide-${index + 1}`;
 
-    // Priority 1: slide.image OR Stock Web Image
     const imageUrl = slide.image || stockImagePool[index % stockImagePool.length];
-    // Fallback: slide.icon OR Emoji Pool
     const fallbackEmoji = slide.icon || iconPool[index % iconPool.length];
 
     const visualMediaHTML = `
@@ -347,6 +434,7 @@ function renderSlides(slides) {
     stage.appendChild(wrapper);
   });
 }
+
 function initLesson(data) {
   bellringers = data.bellringers || [];
   totalSlides = (data.slides || []).length || 1;
@@ -388,12 +476,12 @@ function renderResources(resources) {
   if (Array.isArray(resources)) {
     resourceList = resources;
   } else if (resources && typeof resources === 'object') {
-    if (Array.isArray(resources.buttons)) {
+    if (Array.isArray(resources.items)) {
+      resourceList = resources.items;
+    } else if (Array.isArray(resources.buttons)) {
       resourceList = resources.buttons;
     } else if (Array.isArray(resources.files)) {
       resourceList = resources.files;
-    } else if (Array.isArray(resources.items)) {
-      resourceList = resources.items;
     } else if (resources.file || resources.link || resources.url) {
       resourceList = [resources];
     }
@@ -427,12 +515,11 @@ function renderResources(resources) {
     const resourceUrl = res.file || res.link || res.url || res.href || '#';
     const resourceTitle = res.title || res.name || res.label || 'Resource Item';
     const resourceDescription = res.description || res.summary || '';
-    const fileName = resourceUrl && typeof resourceUrl === 'string' ? resourceUrl.split('/').pop() : '';
 
     card.innerHTML = `
       <div>
-        <strong>${resourceTitle || fileName || 'Resource Item'}</strong><br/>
-        <small>${resourceDescription}</small>
+        <strong>${resourceTitle}</strong><br/>
+        <small class="muted">${resourceDescription}</small>
       </div>
       ${resourceUrl && resourceUrl !== '#' ? `<a href="${resourceUrl}" target="_blank" rel="noopener noreferrer" class="ctrl-btn">Open Resource</a>` : ''}
     `;
@@ -447,34 +534,51 @@ function renderForm(fields) {
 
   const fieldList = Array.isArray(fields) ? fields : [];
 
-  fieldList.forEach(field => {
+  fieldList.forEach((field, idx) => {
     const group = document.createElement('div');
     group.className = 'form-group';
 
-    const label = field.label || field.prompt || `Question ${field.field_id || ''}`.trim() || 'Question';
-    const id = `field_${(field.field_id || label).toString().replace(/\s+/g, '_').toLowerCase()}`;
+    const labelText = field.label || field.question || field.prompt || `Question ${field.field_id || field.id || (idx + 1)}`;
+    const id = `field_${(field.field_id || field.id || idx).toString().replace(/[^\w]/g, '_').toLowerCase()}`;
+    const placeholder = field.placeholder ? field.placeholder.replace(/"/g, '&quot;') : '';
 
+    let subtextHTML = field.subtext ? `<div class="field-subtext">${field.subtext}</div>` : '';
     let inputHTML = '';
-    if (field.type === 'short_answer' || field.type === 'short_text' || field.type === 'text') {
-      inputHTML = `<input type="text" id="${id}" ${field.required ? 'required' : ''} />`;
-    } else if (field.type === 'date') {
-      inputHTML = `<input type="date" id="${id}" ${field.required ? 'required' : ''} />`;
-    } else if (field.type === 'long_text' || field.type === 'quote_citation' || field.type === 'reflection') {
-      inputHTML = `<textarea id="${id}" rows="5" ${field.required ? 'required' : ''}></textarea>`;
-    } else if (field.type === 'multiple_choice' || field.type === 'true_false') {
-      const options = field.type === 'true_false' ? ['True', 'False'] : (field.options || []);
-      inputHTML = options.map((option, index) => `<label><input type="radio" id="${id}_${index}" name="${id}" value="${option}" ${field.required ? 'required' : ''} /> ${option}</label>`).join('<br/>');
-    } else if (field.type === 'checkbox') {
-      inputHTML = (field.options || []).map((option, index) => `<label><input type="checkbox" id="${id}_${index}" name="${id}" value="${option}" /> ${option}</label>`).join('<br/>');
-    } else if (field.type === 'rating_scale') {
-      inputHTML = `<select id="${id}">${(field.options || []).map(o => `<option>${o}</option>`).join('')}</select>`;
-    } else if (field.type === 'select_rubric') {
-      inputHTML = `<select id="${id}"><option>-- Select Rubric Benchmark Level --</option>${(field.options || []).map(o => `<option>${o}</option>`).join('')}</select>`;
-    } else if (field.type === 'checkbox_group' || field.type === 'multi_select') {
-      inputHTML = (field.options || []).map(o => `<label><input type="checkbox" name="${id}" value="${o}" /> ${o}</label>`).join('<br/>');
+
+    const type = (field.type || 'short_answer').toLowerCase();
+
+    if (type === 'short_answer' || type === 'short_text' || type === 'text' || type === 'fill_in_blank') {
+      inputHTML = `<input type="text" id="${id}" name="${id}" placeholder="${placeholder || 'Type your answer here...'}" ${field.required !== false ? 'required' : ''} />`;
+    } else if (type === 'date') {
+      inputHTML = `<input type="date" id="${id}" name="${id}" ${field.required !== false ? 'required' : ''} />`;
+    } else if (type === 'long_text' || type === 'quote_citation' || type === 'reflection') {
+      inputHTML = `<textarea id="${id}" name="${id}" rows="4" placeholder="${placeholder || 'Type your detailed response here...'}" ${field.required !== false ? 'required' : ''}></textarea>`;
+    } else if (type === 'multiple_choice' || type === 'true_false') {
+      const options = type === 'true_false' ? ['True', 'False'] : (field.options || []);
+      inputHTML = `<div class="option-list">` + options.map((option, index) => `
+        <label class="option-label">
+          <input type="radio" id="${id}_${index}" name="${id}" value="${option.replace(/"/g, '&quot;')}" ${field.required !== false ? 'required' : ''} />
+          <span>${option}</span>
+        </label>
+      `).join('') + `</div>`;
+    } else if (type === 'checkbox' || type === 'checkbox_group' || type === 'multi_select') {
+      const options = field.options || [];
+      inputHTML = `<div class="option-list">` + options.map((option, index) => `
+        <label class="option-label">
+          <input type="checkbox" id="${id}_${index}" name="${id}[]" value="${option.replace(/"/g, '&quot;')}" />
+          <span>${option}</span>
+        </label>
+      `).join('') + `</div>`;
+    } else if (type === 'rating_scale' || type === 'select_rubric') {
+      const options = field.options || [];
+      const promptMsg = type === 'select_rubric' ? '-- Select Rubric Benchmark Level --' : '-- Select Rating / Benchmark --';
+      inputHTML = `<select id="${id}" name="${id}" ${field.required !== false ? 'required' : ''}>
+        <option value="">${promptMsg}</option>
+        ${options.map(o => `<option value="${o.replace(/"/g, '&quot;')}">${o}</option>`).join('')}
+      </select>`;
     }
 
-    group.innerHTML = `<label for="${id}">${label}</label>${inputHTML}`;
+    group.innerHTML = `<label class="field-label" for="${id}">${labelText}</label>${subtextHTML}${inputHTML}`;
     form.appendChild(group);
   });
 
@@ -482,21 +586,165 @@ function renderForm(fields) {
 }
 
 function switchTab(key) {
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  const btns = document.querySelectorAll('.tab-btn');
+  const tabs = document.querySelectorAll('.tab-content');
+
+  btns.forEach(btn => btn.classList.remove('active'));
+  tabs.forEach(tab => tab.classList.remove('active'));
 
   if (key === 'deck') {
-    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    btns[0].classList.add('active');
     document.getElementById('deck-tab').classList.add('active');
   } else if (key === 'res') {
-    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    btns[1].classList.add('active');
     document.getElementById('res-tab').classList.add('active');
   } else if (key === 'form') {
-    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    btns[2].classList.add('active');
     document.getElementById('form-tab').classList.add('active');
   }
 }
-window.addEventListener('DOMContentLoaded', () => initLesson({"day": 22, "date": "Oct 1 (Thursday)", "course": "English 8: Beginning Studies in Research, Literature, and Composition", "unit": "Unit 5: Analyzing Narrative and Adaptation in Literature", "topic": "The Outsiders: Final Theme - 'Stay Gold'", "primary_focus": "Connecting Frost's poetry to Johnny’s character arc and message.", "core_objectives": ["Interpreting poetic metaphor in the context of narrative resolution."], "standards": ["8.1.2.2", "8.1.7.7"], "bellringers": ["What does the word 'gold' traditionally symbolize when applied to youth or innocence?", "Recall Robert Frost's poem 'Nothing Gold Can Stay'—what is its central metaphor?", "How does Johnny's final letter to Ponyboy change Ponyboy's perspective on life?", "Define 'literary allusion' and give an example from 'The Outsiders'."], "slides": [{"title": "Unpacking the Allusion: Frost in 'The Outsiders'", "standard": "8.1.2.2", "bullets": ["S.E. Hinton embeds Robert Frost's poem 'Nothing Gold Can Stay' into the story.", "Ponyboy recites the poem at the church in Windrixville during sunrise.", "The poem's metaphor foreshadows the loss of innocence for both characters."], "callout": "An allusion connects narrative themes to broader literary traditions and ideas."}, {"title": "Line-by-Line Analysis: 'Nothing Gold Can Stay'", "standard": "8.1.2.2", "bullets": ["'Nature's first green is gold' refers to early spring blossoms and pristine youth.", "'Her hardest hue to hold' illustrates the brief duration of purity and innocence.", "The poem connects natural decay to human emotional maturation and loss."], "callout": "Frost's imagery establishes impermanence as an inevitable condition of life."}, {"title": "Johnny's Character Arc and Transformation", "standard": "8.1.2.2", "bullets": ["Johnny begins as a fearful, traumatized victim of violence and neglect.", "Through selfless action, Johnny finds purpose and moral clarity in protecting others.", "His understanding of Frost's poem evolves from confusion to deep enlightenment."], "callout": "Johnny's growth culminates in discovering meaning beyond his immediate environment."}, {"title": "Deconstructing Johnny's Dying Words", "standard": "8.1.2.2", "bullets": ["Johnny's final words to Ponyboy are a direct command: 'Stay gold, Ponyboy.'", "The phrase urges Ponyboy to retain his innocence, empathy, and appreciation for beauty.", "Johnny realizes that remaining 'gold' means refusing to become hardened by trauma."], "callout": "'Stay gold' serves as the emotional and thematic anchor of the entire novel."}, {"title": "The Letter in the Copy of 'Gone with the Wind'", "standard": "8.1.2.2", "bullets": ["Johnny leaves a written letter inside the book for Ponyboy to discover later.", "He explains that saving the children was worth sacrificing his own life.", "Johnny reinterprets 'gold' as the innocent wonder children possess naturally."], "callout": "The letter converts Johnny's physical demise into an enduring message of hope."}, {"title": "Comparing Page and Screen Resolutions", "standard": "8.1.7.7", "bullets": ["The novel allows readers to experience Ponyboy's gradual grief through internal narration.", "The film adaptation highlights Johnny's death through lighting, framing, and quiet audio.", "Both versions preserve the emotional weight of Johnny's final words to Ponyboy."], "callout": "Visual quietness in film mirrors the poignant intimacy of reading the scene in print."}, {"title": "Thematic Synthesis: Innocence vs. Hardened Reality", "standard": "8.1.2.2", "bullets": ["Dally Winston represents the outcome of becoming hardened and losing 'gold'.", "Ponyboy stands at a critical crossroad between Dally's bitterness and Johnny's hope.", "The central theme asserts that preserving empathy requires conscious choice."], "callout": "Character fates illustrate the tragic consequences of losing one's humanity."}, {"title": "The Role of Nature and Sunsets as Motifs", "standard": "8.1.2.2", "bullets": ["Sunsets bridge the artificial social divide between Greasers and Socs.", "Ponyboy and Cherry Valance share an appreciation for sunsets across class lines.", "Sunsets symbolize shared human beauty that remains 'gold' despite conflict."], "callout": "Motifs reinforce the novel's lesson that beauty transcends socioeconomic status."}, {"title": "Introduction to the Complex Thematic Mapping Handout", "standard": "8.1.2.2", "bullets": ["Map connections between Frost's poem, Johnny's arc, and Ponyboy's choices.", "Identify textual evidence that demonstrates character growth and theme realization.", "Synthesize poetic metaphors with narrative plot beats into structured diagrams."], "callout": "Visual mapping reveals how authors weave poetry and prose into unified themes."}, {"title": "Guided Analysis: Linking Allusion to Narrative Meaning", "standard": "8.1.2.2", "bullets": ["Step 1: Define the core imagery in Robert Frost's poem.", "Step 2: Trace where and when the poem appears in Hinton's plot.", "Step 3: Articulate how Johnny reinterprets the poem in his final letter."], "callout": "Structured analysis breaks down complex literary allusions into clear steps."}, {"title": "Collaborative Mapping Activity", "standard": "8.1.2.2", "bullets": ["Work in peer pairs to complete the thematic mapping graphic organizer.", "Cite specific page numbers and quotes supporting your thematic claims.", "Discuss how Johnny's message inspires Ponyboy to write his English assignment."], "callout": "Collaborative discussion strengthens textual interpretation through shared reflection."}, {"title": "Daily Reflection and Exit Synthesis", "standard": "8.1.2.2", "bullets": ["Summarize in one sentence what 'stay gold' means for Ponyboy's future.", "Recognize how Hinton uses the novel's ending to loop back to its opening line.", "Prepare thematic insights for tomorrow's thesis statement generation."], "callout": "The novel's circular structure reinforces the act of story writing as healing."}], "resources": "Allusions in Literature: Complex Thematic Mapping across Narratives Handout", "form": [{"field_id": "q1", "label": "Who wrote the poem 'Nothing Gold Can Stay' cited in 'The Outsiders'?", "type": "multiple_choice", "options": ["Robert Frost", "S.E. Hinton", "Walt Whitman", "Langston Hughes"], "correct_answer": "Robert Frost"}, {"field_id": "q2", "label": "Explain what Johnny means when he tells Ponyboy to 'stay gold'.", "type": "short_answer", "prompt": "Define the phrase 'stay gold' in the context of Johnny's final words.", "correct_answer": "He means Ponyboy should retain his innocence, empathy, and wonder rather than becoming hardened."}, {"field_id": "q3", "label": "Inside which book did Johnny leave his final letter for Ponyboy?", "type": "multiple_choice", "options": ["Gone with the Wind", "Great Expectations", "To Kill a Mockingbird", "The Great Gatsby"], "correct_answer": "Gone with the Wind"}, {"field_id": "q4", "label": "True or False: In Frost's poem, 'green' refers to physical vegetation and initial innocence.", "type": "true_false", "correct_answer": "True"}, {"field_id": "q5", "label": "How does Dally Winston's fate contrast with Johnny's message of staying 'gold'?", "type": "short_answer", "prompt": "Describe how Dally's character arc contrasts with Johnny's final message.", "correct_answer": "Dally became hardened and lost his 'gold', leading to despair, while Johnny found purpose and hope."}, {"field_id": "q6", "label": "What natural motif shared by Ponyboy and Cherry symbolizes shared human connection?", "type": "short_answer", "prompt": "Name the motif shared across socio-economic lines in the novel.", "correct_answer": "Sunsets"}, {"field_id": "q7", "label": "Which handout is used today to connect Frost's poetry to Hinton's narrative structure?", "type": "multiple_choice", "options": ["Allusions in Literature: Complex Thematic Mapping across Narratives Handout", "Media Juxtaposition Fillable Matrix", "Thesis Statement Generation Matrix", "Vocabulary Graphic Organizer"], "correct_answer": "Allusions in Literature: Complex Thematic Mapping across Narratives Handout"}, {"field_id": "q8", "label": "How does Johnny's perspective on dying change after saving the children at the church?", "type": "short_answer", "prompt": "Explain how Johnny's attitude toward life and death shifts.", "correct_answer": "He accepts death knowing his life had value and saved innocent lives."}, {"field_id": "q9", "label": "What structural connection exists between the novel's ending and its opening line?", "type": "short_answer", "prompt": "Identify the circular narrative structure of 'The Outsiders'.", "correct_answer": "The novel ends with the exact sentence that begins chapter one, revealing the novel is Ponyboy's essay."}, {"field_id": "q10", "label": "Standard 8.1.2.2 Assessment", "type": "short_answer", "prompt": "How does the inclusion of Frost's poem develop the central theme of 'The Outsiders'?", "correct_answer": "It provides a literary metaphor for the fragility of youth and the importance of preserving empathy."}]}));
+
+window.addEventListener('DOMContentLoaded', () => initLesson({
+  "day": 22,
+  "date": "Oct 1 (Thursday)",
+  "course": "English 8: Beginning Studies in Research, Literature, and Composition",
+  "unit": "Unit 5: Analyzing Narrative and Adaptation in Literature",
+  "topic": "The Outsiders: Final Theme - 'Stay Gold'",
+  "primary_focus": "Connecting Frost's poetry to Johnny’s character arc and message.",
+  "core_objectives": ["Interpreting poetic metaphor in the context of narrative resolution."],
+  "standards": ["MN Standard 8.1.2.2", "MN Standard 8.1.7.7"],
+  "bellringers": [
+    "What does the word 'gold' traditionally symbolize when applied to youth or innocence?",
+    "Recall Robert Frost's poem 'Nothing Gold Can Stay'—what is its central metaphor?",
+    "How does Johnny's final letter to Ponyboy change Ponyboy's perspective on life?",
+    "Define 'literary allusion' and give an example from 'The Outsiders'."
+  ],
+  "slides": [
+    {"title": "Unpacking the Allusion: Frost in 'The Outsiders'", "standard": "MN Standard 8.1.2.2", "bullets": ["S.E. Hinton embeds Robert Frost's poem 'Nothing Gold Can Stay' into the story.", "Ponyboy recites the poem at the church in Windrixville during sunrise.", "The poem's metaphor foreshadows the loss of innocence for both characters."], "callout": "An allusion connects narrative themes to broader literary traditions and ideas."},
+    {"title": "Line-by-Line Analysis: 'Nothing Gold Can Stay'", "standard": "MN Standard 8.1.2.2", "bullets": ["'Nature's first green is gold' refers to early spring blossoms and pristine youth.", "'Her hardest hue to hold' illustrates the brief duration of purity and innocence.", "The poem connects natural decay to human emotional maturation and loss."], "callout": "Frost's imagery establishes impermanence as an inevitable condition of life."},
+    {"title": "Johnny's Character Arc and Transformation", "standard": "MN Standard 8.1.2.2", "bullets": ["Johnny begins as a fearful, traumatized victim of violence and neglect.", "Through selfless action, Johnny finds purpose and moral clarity in protecting others.", "His understanding of Frost's poem evolves from confusion to deep enlightenment."], "callout": "Johnny's growth culminates in discovering meaning beyond his immediate environment."},
+    {"title": "Deconstructing Johnny's Dying Words", "standard": "MN Standard 8.1.2.2", "bullets": ["Johnny's final words to Ponyboy are a direct command: 'Stay gold, Ponyboy.'", "The phrase urges Ponyboy to retain his innocence, empathy, and appreciation for beauty.", "Johnny realizes that remaining 'gold' means refusing to become hardened by trauma."], "callout": "'Stay gold' serves as the emotional and thematic anchor of the entire novel."},
+    {"title": "The Letter in the Copy of 'Gone with the Wind'", "standard": "MN Standard 8.1.2.2", "bullets": ["Johnny leaves a written letter inside the book for Ponyboy to discover later.", "He explains that saving the children was worth sacrificing his own life.", "Johnny reinterprets 'gold' as the innocent wonder children possess naturally."], "callout": "The letter converts Johnny's physical demise into an enduring message of hope."},
+    {"title": "Comparing Page and Screen Resolutions", "standard": "MN Standard 8.1.7.7", "bullets": ["The novel allows readers to experience Ponyboy's gradual grief through internal narration.", "The film adaptation highlights Johnny's death through lighting, framing, and quiet audio.", "Both versions preserve the emotional weight of Johnny's final words to Ponyboy."], "callout": "Visual quietness in film mirrors the poignant intimacy of reading the scene in print."},
+    {"title": "Thematic Synthesis: Innocence vs. Hardened Reality", "standard": "MN Standard 8.1.2.2", "bullets": ["Dally Winston represents the outcome of becoming hardened and losing 'gold'.", "Ponyboy stands at a critical crossroad between Dally's bitterness and Johnny's hope.", "The central theme asserts that preserving empathy requires conscious choice."], "callout": "Character fates illustrate the tragic consequences of losing one's humanity."},
+    {"title": "The Role of Nature and Sunsets as Motifs", "standard": "MN Standard 8.1.2.2", "bullets": ["Sunsets bridge the artificial social divide between Greasers and Socs.", "Ponyboy and Cherry Valance share an appreciation for sunsets across class lines.", "Sunsets symbolize shared human beauty that remains 'gold' despite conflict."], "callout": "Motifs reinforce the novel's lesson that beauty transcends socioeconomic status."},
+    {"title": "Introduction to the Complex Thematic Mapping Handout", "standard": "MN Standard 8.1.2.2", "bullets": ["Map connections between Frost's poem, Johnny's arc, and Ponyboy's choices.", "Identify textual evidence that demonstrates character growth and theme realization.", "Synthesize poetic metaphors with narrative plot beats into structured diagrams."], "callout": "Visual mapping reveals how authors weave poetry and prose into unified themes."},
+    {"title": "Guided Analysis: Linking Allusion to Narrative Meaning", "standard": "MN Standard 8.1.2.2", "bullets": ["Step 1: Define the core imagery in Robert Frost's poem.", "Step 2: Trace where and when the poem appears in Hinton's plot.", "Step 3: Articulate how Johnny reinterprets the poem in his final letter."], "callout": "Structured analysis breaks down complex literary allusions into clear steps."},
+    {"title": "Collaborative Mapping Activity", "standard": "MN Standard 8.1.2.2", "bullets": ["Work in peer pairs to complete the thematic mapping graphic organizer.", "Cite specific page numbers and quotes supporting your thematic claims.", "Discuss how Johnny's message inspires Ponyboy to write his English assignment."], "callout": "Collaborative discussion strengthens textual interpretation through shared reflection."},
+    {"title": "Daily Reflection and Exit Synthesis", "standard": "MN Standard 8.1.2.2", "bullets": ["Summarize in one sentence what 'stay gold' means for Ponyboy's future.", "Recognize how Hinton uses the novel's ending to loop back to its opening line.", "Prepare thematic insights for tomorrow's thesis statement generation."], "callout": "The novel's circular structure reinforces the act of story writing as healing."}
+  ],
+  "resources": {
+    "title": "Allusions & Thematic Mapping Hub",
+    "description": "Literary analysis graphic organizers, poetic text copies, and thematic synthesis rubrics.",
+    "items": [
+      {
+        "label": "Allusions in Literature: Complex Thematic Mapping Handout PDF",
+        "file": "Complex_Thematic_Mapping_Handout.pdf",
+        "description": "Graphic organizer mapping Frost's poem lines directly to character arcs and story resolution beats."
+      },
+      {
+        "label": "Robert Frost 'Nothing Gold Can Stay' Text & Annotation Guide PDF",
+        "file": "Frost_Nothing_Gold_Can_Stay_Annotated.pdf",
+        "description": "Full poetic text with stanza annotations explaining natural metaphors and literary allusion."
+      }
+    ]
+  },
+  "form": [
+    {
+      "field_id": 1,
+      "type": "short_answer",
+      "label": "Student Name & Class Period",
+      "placeholder": "e.g., Alex Morgan - Period 3",
+      "required": true
+    },
+    {
+      "field_id": 2,
+      "type": "multiple_choice",
+      "label": "1. Poetic Metaphor & Natural Imagery (Standard 8.1.2.2)",
+      "subtext": "S.E. Hinton embeds Robert Frost's poem 'Nothing Gold Can Stay' as a central allusion in *The Outsiders*. In Frost's opening line, 'Nature's first green is gold,' what does the color 'gold' represent before it naturally fades?",
+      "options": [
+        "A) Material wealth, luxury cars, and financial status among Socs",
+        "B) The pristine, untarnished innocence and fresh wonder of youth before life hardens a person",
+        "C) The dry, golden autumn leaves falling on the church grounds in Windrixville",
+        "D) The yellow hair dye Ponyboy used to disguise his identity from the police"
+      ],
+      "required": true
+    },
+    {
+      "field_id": 3,
+      "type": "fill_in_blank",
+      "label": "2. Deconstructing Johnny's Dying Words",
+      "subtext": "In his final moment at the hospital, Johnny whispers a famous command to Ponyboy: '__________ gold, Ponyboy. __________ gold.' In your own words, explain what Johnny wanted Ponyboy to keep alive inside himself.",
+      "placeholder": "Type the missing word and explain its meaning regarding empathy and wonder...",
+      "required": true
+    },
+    {
+      "field_id": 4,
+      "type": "checkbox_group",
+      "label": "3. Motifs and Social Transcendence (Multi-Select)",
+      "subtext": "Select ALL symbolic motifs from the novel that bridge the artificial socio-economic divide between the Greasers and the Socs:",
+      "options": [
+        "Watching the exact same golden sunset from different sides of town (Ponyboy and Cherry)",
+        "Sharing an appreciation for Robert Frost's poetry and natural beauty",
+        "Reading Margaret Mitchell's 'Gone with the Wind' together during times of trial",
+        "Organizing territorial street rumbles to prove physical dominance"
+      ],
+      "required": true
+    },
+    {
+      "field_id": 5,
+      "type": "true_false",
+      "label": "4. Character Arc Contrast: Dally vs. Johnny",
+      "subtext": "True or False: Dally Winston's tragic fate demonstrates the outcome of becoming hardened and losing one's 'gold,' serving as a direct contrast to Johnny's message of retaining empathy and hope.",
+      "required": true
+    },
+    {
+      "field_id": 6,
+      "type": "short_answer",
+      "label": "5. The Symbolism of 'Gone with the Wind' & Johnny's Letter",
+      "subtext": "Johnny leaves a handwritten note tucked inside a specific book for Ponyboy. Name the novel, and state Johnny's final conclusion about saving the children from the burning church.",
+      "placeholder": "Identify the novel title and summarize Johnny's reflection on sacrifice...",
+      "required": true
+    },
+    {
+      "field_id": 7,
+      "type": "reflection",
+      "label": "6. Character Crossroads: Empathy vs. Bitterness (Reflection)",
+      "subtext": "Ponyboy stands at a critical crossroads following the deaths of Johnny and Dally. Analyze how reading Johnny's letter prevents Ponyboy from giving in to resentment and becoming bitter like Dally.",
+      "placeholder": "Analyze how Johnny's message inspires Ponyboy to choose empathy, writing, and perspective over grief and anger...",
+      "required": true
+    },
+    {
+      "field_id": 8,
+      "type": "reflection",
+      "label": "7. Structural Synthesis: The Circular Narrative Frame",
+      "subtext": "S.E. Hinton constructs *The Outsiders* with a circular narrative structure. Explain how the final sentence of Chapter 12 connects directly to the opening line of Chapter 1, and why this structural choice transforms the entire novel into a therapeutic act of writing.",
+      "placeholder": "Explain how the novel reveals itself as Ponyboy's semester English essay...",
+      "required": true
+    },
+    {
+      "field_id": 9,
+      "type": "reflection",
+      "label": "8. Expressive Personal Application: 'Stay Gold' in Real Life",
+      "subtext": "Imagine writing a supportive note to a peer who feels overwhelmed, cynical, or hardened by difficult circumstances. Express how Johnny's advice to 'stay gold' can be applied to daily life in middle school and beyond.",
+      "placeholder": "Write a short, expressive message explaining how to preserve kindness, wonder, and perspective during tough times...",
+      "required": true
+    },
+    {
+      "field_id": 10,
+      "type": "select_rubric",
+      "label": "9. Self-Assessment: Poetic Allusion & Narrative Theme Benchmark",
+      "subtext": "Evaluate your proficiency in connecting Frost's poetry to character arcs and analyzing how S.E. Hinton resolves the central themes of *The Outsiders*:",
+      "options": [
+        "Level 4 - Master: I can analyze literary allusions, evaluate circular narrative structure, trace character contrasts, and support claims with quotes.",
+        "Level 3 - Proficient: I can explain 'stay gold,' connect Frost's poem to Johnny and Ponyboy, and identify key motifs like sunsets and letters.",
+        "Level 2 - Developing: I understand that 'gold' means innocence, but I struggle to connect Frost's poem to the novel's structural ending.",
+        "Level 1 - Novice: I need assistance understanding the meaning of Robert Frost's poem and Johnny's final letter."
+      ],
+      "required": true
+    }
+  ]
+}));
 </script>
 </body>
 </html>
